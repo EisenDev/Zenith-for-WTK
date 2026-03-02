@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Hotel {
+  id        String   @id @default(uuid())
+  name      String
+  location  String?
+  createdAt DateTime @default(now())
+  reviews   Review[]
+
+  @@map("hotels")
+}
+
+model Review {
+  id           String   @id @default(uuid())
+  hotelId      String
+  hotel        Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  guestName    String
+  rating       Int
+  source       String
+  comment      String?
+  sentimentTag String?
+  createdAt    DateTime @default(now())
+
+  @@map("reviews")
+}
+
+model UserProfile {
+  id      String  @id
+  role    String  @default("manager")
+  hotelId String?
+
+  @@map("user_profiles")
+}
