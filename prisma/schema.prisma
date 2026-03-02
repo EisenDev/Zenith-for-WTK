@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -28,6 +25,7 @@ model Review {
   source       String
   comment      String?
   sentimentTag String?
+  department   String?  // e.g., 'Housekeeping', 'Front Desk'
   createdAt    DateTime @default(now())
 
   @@map("reviews")
@@ -39,4 +37,38 @@ model UserProfile {
   hotelId String?
 
   @@map("user_profiles")
+}
+
+model HotelCompetitor {
+  id           String   @id @default(uuid())
+  name         String
+  cleanliness  Float
+  value        Float
+  service      Float
+  location     Float
+  reviewCount  Int
+  avgPrice     Float
+  sentiment    Float
+  createdAt    DateTime @default(now())
+}
+
+model AISettings {
+  id                  String   @id @default("default")
+  persona            String   @default("Professional")
+  autoPilotThreshold Float    @default(4.5)
+  keywords           String[] @default([])
+  geminiKey          String?
+  updatedAt          DateTime @updatedAt
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String
+  role       String   @default("dept_user") // 'admin' or 'dept_user'
+  department String?  // e.g., 'Housekeeping', 'Front Desk'
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("users")
 }

@@ -1,14 +1,14 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_AI_API_KEY || "");
+const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || "gemini-1.5-flash" });
 
 export async function POST(req: Request) {
     try {
         const { review, tone } = await req.json();
 
-        if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+        if (!process.env.GEMINI_AI_API_KEY) {
             return NextResponse.json(
                 { error: "Gemini API key not configured." },
                 { status: 500 }

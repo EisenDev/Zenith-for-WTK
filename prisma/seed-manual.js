@@ -15,6 +15,18 @@ async function main() {
         await client.query('DELETE FROM hotels');
         await client.query('DELETE FROM "HotelCompetitor"');
         await client.query('DELETE FROM "AISettings"');
+        await client.query('DELETE FROM users');
+
+        // Insert Admin and Dept User
+        console.log('Seeding administrative accounts...');
+        await client.query(
+            'INSERT INTO users (id, email, password, role, "updatedAt") VALUES (gen_random_uuid(), $1, $2, $3, NOW())',
+            ['admin@zenith.me', 'password123', 'admin']
+        );
+        await client.query(
+            'INSERT INTO users (id, email, password, role, department, "updatedAt") VALUES (gen_random_uuid(), $1, $2, $3, $4, NOW())',
+            ['staff@zenith.me', 'password123', 'dept_user', 'Housekeeping']
+        );
 
         // Insert Hotel
         const hotelId = '00000000-0000-0000-0000-000000000001';
@@ -44,6 +56,7 @@ async function main() {
             ['default', 'Friendly', 4.5, ['Bed bugs', 'Stolen', 'AC broken']]
         );
 
+        const departments = ['Housekeeping', 'Front Desk', 'Spa', 'F&B'];
         const sources = ['Booking.com', 'Expedia', 'Google'];
         const names = ['John Doe', 'Jane Smith', 'Alice Johnson', 'Michael Brown', 'Sophia Davis', 'David Wilson', 'Emma Martinez', 'Chris Anderson'];
         const comments_pos = [
@@ -61,7 +74,7 @@ async function main() {
             'Check-in process took way too long.'
         ];
 
-        console.log('Seeding 1000 reviews...');
+        console.log('Seeding 1000 reviews with department classification...');
 
         for (let i = 0; i < 1000; i++) {
             const isPositive = Math.random() > 0.3;
@@ -70,11 +83,12 @@ async function main() {
             const source = sources[Math.floor(Math.random() * sources.length)];
             const comment = isPositive ? comments_pos[Math.floor(Math.random() * comments_pos.length)] : comments_neg[Math.floor(Math.random() * comments_neg.length)];
             const sentimentTag = isPositive ? 'Positive' : 'Negative';
+            const department = departments[Math.floor(Math.random() * departments.length)];
             const createdAt = new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000);
 
             await client.query(
-                'INSERT INTO reviews (id, "hotelId", "guestName", rating, source, comment, "sentimentTag", "createdAt") VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7)',
-                [hotelId, guestName, rating, source, comment, sentimentTag, createdAt]
+                'INSERT INTO reviews (id, "hotelId", "guestName", rating, source, comment, "sentimentTag", department, "createdAt") VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8)',
+                [hotelId, guestName, rating, source, comment, sentimentTag, department, createdAt]
             );
         }
 

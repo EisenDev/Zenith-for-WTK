@@ -30,8 +30,11 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { AIReplyPanel } from "@/components/ai-reply-panel";
+import { useAuth } from "@/lib/auth-context";
+import { DollarSign } from "lucide-react";
 
 export function IntelligenceFeed() {
+    const { user } = useAuth();
     const [data, setData] = React.useState<any[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -41,10 +44,16 @@ export function IntelligenceFeed() {
     // Fetch data from local API
     React.useEffect(() => {
         async function fetchData() {
+            if (!user) return;
             try {
                 const response = await fetch("/api/reviews");
-                const result = await response.json();
+                let result = await response.json();
+
                 if (Array.isArray(result)) {
+                    // Filter by department for Staff
+                    if (user.role !== "admin" && user.department) {
+                        result = result.filter((r: any) => r.department === user.department);
+                    }
                     setData(result);
                 }
             } catch (error) {
@@ -54,7 +63,7 @@ export function IntelligenceFeed() {
             }
         }
         fetchData();
-    }, []);
+    }, [user]);
 
     const columns = React.useMemo<ColumnDef<any>[]>(
         () => [
@@ -119,6 +128,20 @@ export function IntelligenceFeed() {
                     );
                 },
             },
+            ...(user?.role === "admin" ? [{
+                id: "revenue",
+                header: "Revenue Opportunity",
+                cell: ({ row }: any) => {
+                    const rating = row.getValue("rating") as number;
+                    const opportunity = (6 - rating) * 125.50; // Tactical projection
+                    return (
+                        <div className="flex items-center gap-1.5 text-primary font-bold">
+                            <DollarSign className="h-3 w-3" />
+                            <span className="text-xs">${opportunity.toLocaleString()}</span>
+                        </div>
+                    );
+                }
+            }] : []),
             {
                 id: "actions",
                 cell: ({ row }) => (
@@ -134,7 +157,7 @@ export function IntelligenceFeed() {
                 ),
             },
         ],
-        []
+        [user]
     );
 
     const table = useReactTable({

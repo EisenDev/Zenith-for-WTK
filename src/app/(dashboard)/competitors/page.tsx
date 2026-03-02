@@ -64,12 +64,14 @@ export default function CompetitorsPage() {
         },
     ];
 
-    const pieData = data.competitors.map((c: any) => ({
+    const competitors = data?.competitors || [];
+
+    const pieData = competitors.map((c: any) => ({
         name: c.name,
         value: c.reviewCount
     })).concat([{ name: "ZENITH", value: 1000 }]);
 
-    const scatterData = data.competitors.map((c: any) => ({
+    const scatterData = competitors.map((c: any) => ({
         name: c.name,
         price: c.avgPrice,
         sentiment: c.sentiment,

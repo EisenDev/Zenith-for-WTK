@@ -156,7 +156,7 @@ export default function SettingsPage() {
                             </Button>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            {settings.keywords.map((word: string) => (
+                            {(settings.keywords || []).map((word: string) => (
                                 <Badge key={word} variant="secondary" className="bg-rose-400/10 text-rose-400 border-none py-1.5 px-3 text-[10px] font-bold uppercase tracking-widest">
                                     {word}
                                     <button

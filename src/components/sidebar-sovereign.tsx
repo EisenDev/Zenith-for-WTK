@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
     LayoutDashboard,
     MessageSquareQuote,
@@ -10,7 +11,9 @@ import {
     Settings,
     Hotel,
     ChevronRight,
+    LogOut,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 import { motion } from "framer-motion";
 
 import {
@@ -50,7 +53,16 @@ const navItems = [
 ];
 
 export function SidebarSovereign() {
+    const { user, logout } = useAuth();
     const pathname = usePathname();
+
+    const filteredItems = navItems.filter(item => {
+        if (!user) return false;
+        if (item.url === "/settings" || item.url === "/competitors") {
+            return user.role === "admin";
+        }
+        return true;
+    });
 
     return (
         <Sidebar collapsible="icon" className="border-r border-white/5 bg-sidebar font-poppins">
@@ -64,14 +76,14 @@ export function SidebarSovereign() {
                     </span>
                 </Link>
             </SidebarHeader>
-            <SidebarContent className="px-2 py-4">
+            <SidebarContent className="px-2 py-4 flex flex-col h-full">
                 <SidebarGroup>
                     <SidebarGroupLabel className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/30 transition-opacity duration-300 group-data-[collapsible=icon]:opacity-0 mb-2">
                         Navigation
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu className="gap-1">
-                            {navItems.map((item) => {
+                            {filteredItems.map((item) => {
                                 const isActive = pathname === item.url;
                                 return (
                                     <SidebarMenuItem key={item.title}>
@@ -100,6 +112,33 @@ export function SidebarSovereign() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
+
+                <div className="mt-auto px-4 pb-4 space-y-4">
+                    {user && (
+                        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 group-data-[collapsible=icon]:hidden">
+                            <div className="flex items-center gap-3">
+                                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-black">
+                                    {user.email[0].toUpperCase()}
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-[10px] font-bold text-foreground truncate">{user.email}</span>
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40 italic">
+                                        {user.role === 'admin' ? 'Nexus Admin' : `${user.department} Operations`}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <Button
+                        variant="ghost"
+                        onClick={logout}
+                        className="w-full h-11 px-4 justify-start gap-3 rounded-xl text-muted-foreground/50 hover:bg-rose-500/10 hover:text-rose-400 transition-all duration-300 group font-poppins"
+                    >
+                        <LogOut className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                        <span className="text-[11px] font-bold uppercase tracking-[0.2em] group-data-[collapsible=icon]:hidden">Terminate Session</span>
+                    </Button>
+                </div>
             </SidebarContent>
             <SidebarRail />
         </Sidebar>
